@@ -1,0 +1,108 @@
+{
+  "info": {
+    "name": "Multi-Vendor Data Fetch Service",
+    "description": "API collection for testing the Multi-Vendor Data Fetch Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Create Job",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": 12345,\n  \"query\": \"get_user_data\",\n  \"metadata\": {\n    \"source\": \"web_app\",\n    \"priority\": \"high\",\n    \"timestamp\": \"2023-12-21T10:30:00Z\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/jobs",
+          "host": ["{{base_url}}"],
+          "path": ["jobs"]
+        }
+      }
+    },
+    {
+      "name": "Get Job Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/jobs/{{request_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["jobs", "{{request_id}}"]
+        }
+      }
+    },
+    {
+      "name": "Vendor Webhook",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"job_id\": \"{{request_id}}\",\n  \"data\": {\n    \"result\": \"processed_data\",\n    \"metadata\": {\n      \"vendor\": \"async_vendor\",\n      \"processing_time\": 3.5,\n      \"timestamp\": \"2023-12-21T10:35:00Z\"\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/vendor-webhook/async",
+          "host": ["{{base_url}}"],
+          "path": ["vendor-webhook", "async"]
+        }
+      }
+    },
+    {
+      "name": "Test Complete Workflow",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"test_data\": {\n    \"user_id\": 99999,\n    \"query\": \"comprehensive_test\",\n    \"metadata\": {\n      \"source\": \"postman_test\",\n      \"test_type\": \"workflow\",\n      \"timestamp\": \"2023-12-21T10:40:00Z\"\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/jobs",
+          "host": ["{{base_url}}"],
+          "path": ["jobs"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "request_id",
+      "value": "550e8400-e29b-41d4-a716-446655440000",
+      "type": "string"
+    }
+  ]
+} 

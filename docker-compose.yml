@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+  # Redis for Streams
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  # API Server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: api-server
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/
+      - REDIS_URL=redis://redis:6379
+      - VENDOR_SYNC_URL=http://vendor-sync:8001
+      - VENDOR_ASYNC_URL=http://vendor-async:8002
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - app-network
+
+  # Background Worker
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: worker
+    environment:
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/
+      - REDIS_URL=redis://redis:6379
+      - VENDOR_SYNC_URL=http://vendor-sync:8001
+      - VENDOR_ASYNC_URL=http://vendor-async:8002
+    depends_on:
+      - mongodb
+      - redis
+      - vendor-sync
+      - vendor-async
+    networks:
+      - app-network
+
+  # Sync Vendor Mock
+  vendor-sync:
+    build:
+      context: .
+      dockerfile: Dockerfile.vendor
+    container_name: vendor-sync
+    ports:
+      - "8001:8001"
+    environment:
+      - VENDOR_TYPE=sync
+      - VENDOR_PORT=8001
+    networks:
+      - app-network
+
+  # Async Vendor Mock
+  vendor-async:
+    build:
+      context: .
+      dockerfile: Dockerfile.vendor
+    container_name: vendor-async
+    ports:
+      - "8002:8002"
+    environment:
+      - VENDOR_TYPE=async
+      - VENDOR_PORT=8002
+    networks:
+      - app-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  app-network:
+    driver: bridge 
